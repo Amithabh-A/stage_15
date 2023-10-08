@@ -1,0 +1,19 @@
+// CODE : Timer interrupt handler
+
+// saving userStack in process table and changing SP to kernel stack
+[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE+1] * 16) + 13] = SP;
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE+1] * 16) + 11]*512 - 1;
+
+backup;
+
+//Set state of current process as READY
+alias currentPID R0;
+currentPID = [SYSTEM_STATUS_TABLE+1];
+[PROCESS_TABLE + currentPID * 16 + 4] = READY;
+
+call SCHEDULER;
+
+restore;
+
+//setting SP to userStack. Note that we are not saving Kernel stack. 
+ireturn;
